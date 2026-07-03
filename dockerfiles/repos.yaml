@@ -1,0 +1,21 @@
+repos:
+  - name: shitspotter
+    local_path: ~/code/shitspotter
+    remote_url: https://gitlab.kitware.com/computer-vision/shitspotter
+
+  - name: YOLO-v9
+    local_path: ~/code/YOLO-v9
+    remote_url: git@github.com:Erotemic/YOLO.git@upgrades
+
+  - name: Open-GroundingDino
+    local_path: ~/code/Open-GroundingDino
+    remote_url: git@github.com:Erotemic/Open-GroundingDino.git@main
+
+  # kwcoco-detector-kit — the v6+ training/eval interface for the mobile
+  # quality push (pico@416, n@640). recurse_submodules picks up
+  # tpl/DEIMv2 and tpl/Open-GroundingDino so the image is self-contained
+  # without a runtime `git submodule update`.
+  - name: kwcoco_detector_kit
+    local_path: ~/code/kwcoco_detector_kit
+    remote_url: https://github.com/Erotemic/kwcoco-detector-kit
+    recurse_submodules: true
