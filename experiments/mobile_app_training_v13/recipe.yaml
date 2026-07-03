@@ -1,0 +1,70 @@
+# v13 — pico@768 on the multi-scale tile corpus. DEIMv2 only (no OGDino).
+# Multiscale lives in the DATA (corpus_spec.yaml), so the network input is
+# cleanly FIXED — no more misleading multiscale_* policy that collapsed to
+# fixed for pico (HGNetv2 has no dynamic input). build the corpus first with
+# run.sh (calls the generic `tile-corpus`), then train.
+---
+schema: recipe.v1
+name: shitspotter_v13_pico768_multiscale
+description: >
+  pico@768 trained on the v13 multi-scale tile corpus (whole-frame + 2x2
+  full-res crops + multiscale far->near tiles). Targets scale robustness for
+  the move-around-the-yard / robot-pickup use case.
+
+data:
+  # SCALE-BALANCED train set (balance_corpus.sh -> kwcoco-detector-kit
+  # balance-scale): the raw corpus is 1.27M tiles, 70x scale-imbalanced and
+  # ~93% empty, so uniform sampling drowns the coarse/far scales. The balanced
+  # set is ~254k tiles, uniform across scale + ~40% positive per scale, which
+  # also makes epochs ~5x faster. Vali stays the full multi-scale corpus (eval
+  # should be representative, not balanced).
+  train_kwcoco: /media/joncrall/flash1/kcd-ssd/v13/data/train_corpus_balanced.kwcoco.zip
+  vali_kwcoco:  /media/joncrall/flash1/kcd-ssd/v13/data/vali_corpus.kwcoco.zip
+  test_kwcoco:  /data/joncrall/dvc-repos/shitspotter_expt_dvc/foundation_detseg_v3/v9/detector_prepared/test.simplified.kwcoco.zip
+  tile_store: kwcoco_jpeg
+
+workspace:
+  # new workspace so the warm-start checkpoint (read from the killed v13 run)
+  # isn't clobbered by the relaunch's own outputs.
+  kcd_root: /media/joncrall/flash1/kcd-ssd/v13b
+
+sweep:
+  trainer: deimv2
+  category_names: poop
+  matrix:
+    - variant: deimv2_pico
+      input_hw: [768, 768]
+      train_policy: fixed          # multiscale is in the DATA now; input fixed
+      # WARM-START from the killed run's epoch-3 weights (banks ~half of v11's
+      # entire step count). DEIM loads this with -t (tuning: weights only,
+      # fresh optimizer/schedule), so the new short annealing schedule applies.
+      init_checkpoint: /media/joncrall/flash1/kcd-ssd/v13/runs/deimv2_pico_768x768_fixed/best_stg2.pth
+  # Short schedule on the balanced corpus -> the kit now emits flat_epoch=5
+  # (num_epochs//2) so the LR actually cosine-anneals in the 2nd half + a small
+  # no-aug tail. ~1h/epoch on the ~254k balanced corpus -> ~10h total.
+  num_epochs: 10
+  batch_size: 48                   # ~16 GB at 768; leaves display headroom
+  val_batch_size: 48
+  lr: 5.0e-4                       # kept (warm-start fine-tune; bigger batch is just steadier)
+  backbone_lr: 2.5e-5
+  use_amp: true
+  scale_tier: M
+  num_gpus: 1
+  distributed: false
+  do_export: true
+  do_eval: true
+  do_bench: true
+  # Tiled (windowed) test eval — the inference-correct protocol for a
+  # tile-trained model (whole-image eval understates it badly; sealions saw
+  # 0.135 -> 0.840 from this alone). Window defaults to the 768 input.
+  tiled_eval: true
+  tiled_eval_overlap: 0.2
+
+eligibility:
+  max_desktop_ms: 80.0
+  min_device_fps: 1.0
+  include_smoke_models: false
+
+reproducibility:
+  seed: 0
+  deterministic: false
