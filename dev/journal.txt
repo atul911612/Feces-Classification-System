@@ -1,0 +1,757 @@
+A log of experiences while developing this project that aren't always obvious
+from the git log.
+
+
+# 2024-08-01
+
+Getting bittorrent to work in the situation where I seed something on one
+machine in a network and then download it on another it on another machine on
+the network. I am going to write a stackoverflow post about this, and I will
+draft it here. I'm looking for a way to record the following sort of
+difficulties, and this "dev/lab journal" is what I came up with.
+
+https://superuser.com/questions/1851016/a-minimal-example-of-sharing-data-with-bittorrent
+
+.. code:: 
+
+    A minimal example of sharing data with BitTorrent 
+
+    I want to write a minimal, reproducible, and configurable minimal example that
+    demonstrates how to create, seed, and download a torrent. 
+
+    ### Issue & Question
+
+    This is much harder than I anticipated. The command line tooling is weaker than
+    I would have guessed, but it exists, and it should be possible. There are a lot
+    of edge-cases to consider when writing a networking example, and perhaps my
+    difficulty is because I'm hitting one of those. I'm looking for help with
+    writing up this example in a way that helps document what some of the issue
+    might be.
+
+
+    ### Setup
+
+    I'm running all of this on a home network behind a simple router. I'm using two
+    machines on this network. A rasberry pi 4, and my x86-84 desktop. Both are
+    running ubuntu. I'm not sure if being on the same LAN behind the same NAT-ed
+    router is going to cause an issue? The seeding machine does have ports 6969 and
+    51413 forwarded to it, but the download machine does not. Is that an issue?
+    I would think it would still work.
+
+    ### Script
+
+    The following is the MWE I've written so far. Not sure how to make RST look
+    nice on SuperUser, so putting it in a code block:
+
+        <code from ~/code/shitspotter/docs/source/manual/minimal_bittorrent_example.rst>
+
+# 2024-08-02
+
+Made good progress on writing the paper. Went from 1ish to 4ish pages. The layout is coming together and I think the abstract is compelling.
+
+# 2024-08-03
+
+And my superuser question got closed for being too open ended. Annoying. In any case, I might have figured out the problem. It looks like the downloading machine does connect to the seed machine but there is a permission issue, by changing the download location I'm hoping that fixes it...
+
+Also m "h" key is stuck and i'm currently typing it by copying it into the clipboard and pasting it. Need to clean my keyboard.
+
+# 2024-09-21
+
+Got desk rejected due to going over length, bummer. It was a stupid mistake
+where I included the appendix in the main paper instead of the suplementary
+materials. Guess I can try for CVPR, but passing review there will be less
+likely.
+
+We will increase chances of getting into CVPR if we include SOTA models.
+I think I will try detectron2, as mmdet has not been great to work with lately,
+but I might got back there later. When working with detectron2 I'm noticing
+some pain points, which I should document. I will put these notes in
+
+~/code/shitspotter/experiments/detectron2-experiments/README.md
+
+
+# 2024-09-29
+
+
+I just realized that the validation results I reported on in the paper were generated from the incorrect data. 
+I used vali_imgs228_20928c8c.kwcoco.zip instead of
+vali_imgs691_99b22ad0.kwcoco.zip. I suppose its good the paper was rejected,
+otherwise I would have had to issue a redaction. More time to get it right I
+suppose.
+
+# 2024-10-14
+
+Solicited pics on https://www.reddit.com/r/Albany/comments/1g28ger/albany_dog_poop_detection_send_me_your_poop_pics/
+Not sure if it will get any hits. Some of the responses were surprising.
+
+# 2024-12-29
+
+A few days ago I got 75 high-quality pictures from someone online. It doesn't
+seem related to the albany reddit post which got nothing. There are some
+challenging cases in the images and they are perfect for testing. Very happy
+about that.
+
+I've been unable to update as frequently as I would have liked in the past 2
+months. I'm trying to figure out the best way to temporarily remove
+identifiable metadata (i.e. GPS location). This is challenging for a few
+reasons. GPS turns out to be less accurate than I would like, and surrounding
+buildings seem to throw things off by a lot to the point where there isn't a
+good line between locations I want to be public and those I want to be private.
+
+What I've done so far is:
+* setup a transcrypt repo that stores secret logic for how I determine which images will have their metadata removed. Some of this can be based on geolocation, but due to GPS errors that is not enough, and we need a different non-public method.
+* After running the images through the logic, the ones that are sensitive are marked to have their GPS info removed.
+* Given a list of marked images, I scrub the metadata, but I also create a binary diff that if applied to the original image would "rehydrate" it and restore it to its original state.
+
+These diffs are going to be stored in an encrypted format and distributed with
+the dataset. I do eventually want to "rehydrate" the stripped metadata, as
+noisy GPS locations won't be sensitive forever (and frankly aren't that
+sensitive right now, but this is more of a privacy exercise than a critical
+component, otherwise I wouldn't even post the encrypted version online). An
+interesting way I can think to do this would be to set up a dead man's switch
+on Ethereum's EVM. Perhaps using https://sarcophagus.io/
+
+RPI grad has a paper about kill switches: https://arxiv.org/html/2407.10302v1
+
+The idea would be to store the encrypted version of the key on the blockchain
+and then after some amount of time passes or some other condition is met the
+decryption will automatically take place, and the full dataset will effectively
+become public.
+
+I'm currently using the detectron2 model to seed annotations for the next
+round.  I think its at the point where it is ultimately less work. I'm also
+annotating false positives (e.g. rock / leaf) so the network can be given those 
+regions explicitly as hard negatives.
+
+# 2024-12-30
+
+Well, I got the scrubbing and release done. The pattern of uploading the entire
+dataset to IPFS every time is somewhat unsustainable. It needs to scan 53GB to
+build the final CID currently. Its taking over 30 minutes to just build the
+CID. Not the end of the world, but it shouldn't be taking this long, or at least 
+we should be able to have a system where only the new data needs to be scanned.
+
+I think what I will do is use the new shitspotter.ipfs logic to build DVC like
+sidecar files and then push the sidecars to a git repo. This will give much
+better response times in the future.
+
+However, something to note is that pinning on a new machine where all of the
+sub-cids have been pinned, it is very fast. Err, this might not be correct.
+
+Yeah, the CID it spat out was something that already existed, and the issue was
+that it could read in a file with write protections. 
+
+
+# 2025-02-07
+
+
+I found a new related dataset:
+
+Poultry fecal imagery dataset for health status prediction: A case of South-West Nigeria
+Halleluyah O Aworinde 1, Segun Adebayo 2, Akinwale O Akinwunmi 1, Olufemi M
+Alabi 2, Adebamiji Ayandiji 2, Aderonke B Sakpere 3, Abel K Oyebamiji 2, Oke
+Olaide 1, Ezenma Kizito 1, Abayomi J Olawuyi 1
+Affiliations Expand
+PMID: 37674505 PMCID: PMC10477973 DOI: 10.1016/j.dib.2023.109517
+
+https://pubmed.ncbi.nlm.nih.gov/37674505/
+
+https://universe.roboflow.com/search?q=class:fecal%20matter
+
+https://chatgpt.com/c/67a6a1ed-bd94-8013-b5a8-f19f8f9c9bd2
+
+https://ieee-dataport.org/documents/fecal-microscopy-dataset
+
+https://universe.roboflow.com/thesis-pr4oh/fecal-lbh0j
+
+https://arxiv.org/pdf/1903.10578
+
+https://www.reddit.com/r/poop/
+
+https://www.theverge.com/2019/10/29/20937108/poop-database-ai-training-photo-upload-first-mit
+
+
+# 2025-03-07
+
+I haven't been updating this project much in the last 2-3 months, but I've
+still been taking pictures.
+
+I'm starting an update today, but its a big bundle of 1199 images from my phone
+(of which some are for this dataset). Looks like 440 of them were poop images,
+so 145ish new poop images, which should give us over 2k positive examples.
+
+My picture taking pattern has also changed, given that we moved from a place
+without a yard to a place with a yard. Now the images are much more bursty as I
+don't need to take the dogs out on a leash. So I pick a bunch up later. That
+means less diverse time of day, but now there is less of a freshness bias as
+I'll wait a few days before picking everything up. I do still go on walks into
+the city, so there are still new fresh and not-my-dogs examples coming in.
+
+Been working on the YOLO training. Out of the box it did not work. I had to do
+some rewrites of the WongKinYiu https://github.com/MultimediaTechLab/YOLO.git
+YOLO fork. 
+https://github.com/MultimediaTechLab/YOLO/pull/150
+
+After I wrote code to visualize the training bathes, I realized the
+augmentations were all wrong for this dataset, there was no flipping, and
+the mosic and crop/resize probably hurt convergence. I played with exposing
+more lightning CLI features and tuned gradient clipping, lr, batch size, and
+simplified the dataset (merged small nearby boxes into a single box) with the
+intent of helping YOLO learn better. ChatGPT said it had an unstable loss
+surface, but I'd like to see sources that better explain why. I believe it
+though. YOLO is a bitch to train. Was in v2, and it seems like it still is in
+v9. But when it work, it does work well. But I've noticed gradients like to
+explode. Wish I understood if this actually was more likely to happen or not
+with YOLO vs other models.
+
+Running with the simplified data, a low LR of 0.0003, a batch size of 16*50,
+and starting from v9 weights seems to be doing better than I've done on this
+dataset before.
+
+# 2025-03-08
+
+The two LRs I tested yesterday did about the same. Today I got AdamW working
+(and maybe CosineLR - although its not clear I got the scheduler right), and it
+converges to about the same performance much much quicker. Getting AP@.5 of
+~64% and AP%0.5:0.95; of 42% small recall is about 60%, medium recall is about
+80%
+
+
+# 2025-04-21
+
+Working on getting the dataset ready for another submission. Hugging face has
+impressive dataset distribution infastructure. It's somewhat decentralized in
+that it uses git-lfs, so maybe it is best of both worlds. In any case, I had
+uploaded the 2024-08-09 snapshot to it before, which happens to correspond to
+the 2024-07-03 dataset (as I didn't update the data while I was working on that
+original submission). Additionally I tagged it with its IPFS CID:
+bafybeiedwp2zvmdyb2c2axrcl455xfbv2mgdbhgkc3dile4dftiimwth2y, which
+unfortunately won't match the data because its zipped, and I think the CID had
+a few extra files that belong to it. In any case, I'm writing this to document
+that all 3 of those identifiers belong to the same dataset.
+
+The updated version of the dataset for the new publication will have a CID of:
+bafybeia2uv3ea3aoz27ytiwbyudrjzblfuen47hm6tyfrjt6dgf6iadta4 and its zipped
+snapshot date is: 2025-04-21T184031-5.
+
+
+# 2025-04-26
+
+
+Hugging face is so fast. I spoke with colleages, the likely reason is CDNs and
+cake, which prevent buffer bloat.
+
+Here are notes I took:
+
+CDNs and CAKE.
+Cake solves buffer bloat - look into this.
+Filling all buffers along TCP path.
+https://github.com/huggingface/hf_transfer
+https://www.bufferbloat.net/projects/codel/wiki/Cake/
+
+
+Talks on Data. 
+https://www.youtube.com/watch?v=KD5TwLQnq_8
+https://www.youtube.com/watch?v=KD5TwLQnq_8
+https://www.youtube.com/watch?v=PgFcqRMDqlk
+https://www.bufferbloat.net/projects/codel/wiki/Cake/
+
+Also we may want to make these points: 
+
+Annotations for data collected in <confirm time range> late 2024-2025 used
+trained models to seed initial detections. However, each case is still manually
+checked.  For simple cases this worked well, but there were a significant
+number of errors that needed to be corrected. We did not delete the false
+positive detections. Instead we gave them new category names (e.g. leaf, stick,
+grass, shadow). These can serve as explicit hard negatives. We also began
+adding notes to some annotations indicating the appearance of the poop (e.g.
+old, smashed, wet).
+
+
+# 2025-05-03
+
+Spend some time getting the 2025-04-20 version of the dataset into a torrent.
+Made some updates to the CLI wrapper around transmission-remote. Was having a
+hard time getting new downloads to start, but after some time I realized I
+forgot to forward port 51413 to my torrent box running transmission. Seems to
+be starting now.
+
+Also going to try forwarding 58334 to my box running deluge, and that seemed to
+work.
+
+
+# 2025-07-02
+
+Annotating a bunch of images taken since the 2024-04-20 release, have ~600
+images, so ~200 with poop.  Its interesting to see the MaskRCNN failure cases.
+It certainly gets it right a lot of the time, but there are still some (what
+seem to be easy) misses. There is definately an issue with leafs, helicopter
+seeds, and sticks. But now those will be false positive annotations. 
+
+Missing cases where the poop is in a strong light gradient. Occluded cases.
+Generally noisy images cases. Some cases, which are probably due to NMS issues,
+but not 100% sure.
+
+Pretty good at cases in beds of clover or in short grass.
+Rocks with strong shadows are causing false positives.
+
+I should probably retrain the model its at least 6 months out of date.
+
+What is my image capture rate? / Dataset growth rate? A: 170-215 images /
+month.
+
+Should make a wordcloud of negative annotations.
+
+Current tag / cat histograms are:
+
+cat_hist = {
+    'mulch': 1,
+    'yellowsnow': 1,
+    'acorn-cap': 1,
+    'cigarette': 1,
+    'wood': 1,
+    'tree-trunk': 1,
+    'plant-matter': 1,
+    'root': 1,
+    'acorn': 1,
+    'dogtoy': 1,
+    'nut': 2,
+    'treebark': 2,
+    'treeroot': 2,
+    'background': 2,
+    'residue': 2,
+    'pine-leafs': 2,
+    'pipe': 2,
+    'bottle-cap': 2,
+    'shadow': 2,
+    'woodpost': 2,
+    'wood-chip': 3,
+    'leafs': 4,
+    'dirt': 4,
+    'crushed-nut': 4,
+    'bark': 5,
+    'helicopter-seed': 5,
+    'grass-patch': 6,
+    'rock': 10,
+    'ignore': 11,
+    'stick': 13,
+    'helicopterseed': 13,
+    'unknown': 14,
+    'pine-cone': 16,
+    'leaf': 134,
+    'poop': 6817,
+}
+tag_hist = {
+    'from-roadie': 1,
+    'sqashed': 1,
+    'blury': 1,
+    'dark': 1,
+    'blurry': 1,
+    'big-pile': 1,
+    'stringy': 1,
+    'polygon-hole': 1,
+    'hard': 1,
+    'partial-occlusion': 1,
+    'wet': 1,
+    'digestedtoy': 1,
+    'frozen': 1,
+    'shiney': 1,
+    'maybe-sick': 1,
+    'confusor': 1,
+    'crumbling': 1,
+    'residue': 1,
+    'liquidy': 1,
+    'some crud in it, maybe a toy': 1,
+    'liquid': 1,
+    'unsure': 1,
+    'soft': 1,
+    'inside': 1,
+    'ambiguous': 1,
+    'hardcase': 1,
+    'hairy': 1,
+    'difficult': 2,
+    'smeared': 2,
+    'splatter': 2,
+    'occlusion': 2,
+    'gross': 3,
+    'decomposing': 3,
+    'residual': 3,
+    'minor-occlusion': 3,
+    'splat': 3,
+    'camo': 4,
+    'hidden': 5,
+    'camoflauged': 5,
+    'squashed': 6,
+    'messy': 7,
+    'sick': 9,
+    'diarrhea': 13,
+    'snowcovered': 13,
+    'occluded': 17,
+    'crumbly': 19,
+    'smashed': 19,
+    'fresh': 25,
+    'old': 105,
+}
+
+
+I need to think about this project's end state.
+
+When is the dataset big enough? I'm thinking I want about 10,000 images with
+good poop annotations as an arbitrary number. That will take about 7-10 more
+years at current growth rates.
+
+But maybe the end state is really:
+
+* There exists a good phone app that has a very high detection F1 to the point
+  of being useful.
+
+# 2025-07-06
+
+Had meeting with Arshia, who is interseted in working on the project.
+
+Apparently I missed a bunch of related work.
+
+https://www.housebeautiful.com/lifestyle/kids-pets/a31289426/robot-picks-up-dog-poop/
+
+Several robos poop datasets
+
+https://universe.roboflow.com/search?q=class%3Apoop
+
+https://universe.roboflow.com/dog-poop/dog-poop-qdsbu - 3k images, but that seems to include augmentations. - /home/joncrall/Downloads/dog-poop-qdsbu.Dog Poop.v11i.coco.zip
+https://universe.roboflow.com/audrey-kim/object-dog-poo-health - 43 images
+https://universe.roboflow.com/ncue-uhqpj/dog-poop-mmvam - 408 images
+https://universe.roboflow.com/project-oftnd/dog-6eieq - 1k
+https://universe.roboflow.com/cj-capstone/dog-poop-13vwg/ - 1k - fake poop?
+https://universe.roboflow.com/pazini/dog-poop-detection-uip1h - 134 - indoor
+https://universe.roboflow.com/poo-detection/pet-poop-classifier - 4k pet poop classifier
+https://universe.roboflow.com/master-student-utm8q/horses-poop - 85 - hoarse poop
+https://universe.roboflow.com/test-iznis/dog-poo - 2k - dog poop health classification
+https://universe.roboflow.com/benito/dog-excrement - 1.6k - classification -
+https://universe.roboflow.com/zihao-deng-lriko/pet_poop - 1.6k - boxes, various pets
+
+https://universe.roboflow.com/sktflyai-mjy00/poop_no.2 - 39 - human poop in toilet
+https://universe.roboflow.com/sktflyai-mjy00/poop_no.4 - 287 - human poop in toilet
+
+https://universe.roboflow.com/test-a7qfj/pet-waste-detect - This is my dataset.
+https://universe.roboflow.com/poopdetector/messalert - 54 - indoor
+
+
+# 2025-07-25
+
+Got initial reviews back. Got 2 weak rejects, 1 weak accept, and 1 accept. Most
+critiques were valid. I may be able to bump one reviewer up with more
+experiments. Running a GroundingDINO experiment has been on my mind, so I'm
+working on that. Not sure if I'll get SWIN or segformer working in time.
+
+https://openreview.net/forum?id=aO24vWoPmK&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DNeurIPS.cc%2F2025%2FDatasets_and_Benchmarks_Track%2FAuthors%23your-submissions)#discussion
+
+
+# 2025-07-28
+
+
+Noting that the roboflow datasets are difficult to analyze. They contain
+pre-augmented images, which makes it hard to count the actual number. 
+
+
+# 2025-08-16
+
+Whenever I log into my ipfs server after a long enough time, I always find that
+the service is dead. Maybe ChatGPT is good enough to help me fix this issue now.
+Put the code in my local dotfiles init/init_ipfs as a bash function
+
+# 2025-09-05
+
+TODO: look into https://github.com/tue-mps/eomt as a way to get foundational dino based segmentation
+
+
+# 2025-09-11
+
+More releated information:
+
+https://icwdm.org/identification/feces/scat-id/
+
+https://www.whopooapp.com/
+
+# 2025-09-20
+
+I've gathered information on 33 roboflow dataset, and I've identified a subset that are usable out of the box.
+
+                              full_id  size_bytes           project_type  files      size  n_anns  n_imgs   use
+5   pazini/dog-poop-detection-uip1h/3     3678359  instance-segmentation    139   3.51 MB     150     134  True
+0                 han-bjamu/poppopo/2    37831009  semantic-segmentation    493  36.08 MB     947     490  True
+17     new-workspace-j42am/softpoop/1    24817300  semantic-segmentation    322  23.67 MB     435     319  True
+15     new-workspace-j42am/dp-4iarz/1     9136253  semantic-segmentation     77   8.71 MB     196      74  True
+size_bytes    75462921
+files             1031
+size          71.97 MB
+n_anns            1728
+n_imgs            1017
+use                  4
+full_id          total
+
+
+This gives us quite a nice extension to our test set.
+
+# 2025-09-21
+
+
+Testing on this data gives us an AP of 0.7731623658373592.
+
+# 2025-10-17
+
+
+The mkorzunowicz/poopdetector MAUI app works with YOLOX onnx models but runs at around 3 frames per second. The app will detect poop close up, and false positives are less common than they used to be. But the small object detection has an AP of 0.18ish which is nowhere near good enough. But with more data, better training, better networks, we should be able to do a bit better. Not sure about if we can do better than onnx on the pixel5 hardware. 3 FPS is good enough, but it would be nice to improve.
+
+
+Training on my new bigger dataset gave me the best YOLOX results I've seen so far. I've got AP around 0.7 (previous best at maybe 0.6ish) and my AP for small objects got to over 0.3 (previous was around 0.15).
+
+
+# 2025-11-09
+
+Rejected from WACV. A reject, weak reject, and weak accept. 
+
+I lost the reviewer lottery for WACV. Perhaps I could have mitigated this by refocusing the introduction on the application, but it felt like they went out of their way to miss the point in some cases.
+
+Particularly frustrating was:
+ 
+> The primary motivation being a phone app to assist dog owners in cleaning up after their dogs seems of questionable utility -- presumably the owners can see it themselves?
+
+and 
+
+> The paper does not clarify whether multiple images were captured from different angles of the same scene (if not why?)
+
+Did they not see the nearly impossible to see annotation in the first image or any other example image? Or the second image where the negative is from the same angle. I probably should recolor it to make it clear that the annotation is only easy to see because I colored it blue, and explicitly state the second part. But again, different reviewers probably would want something else that I left implicit to be made explicit.... 
+
+
+# 2025-11-26
+
+Working on annotating the latest cohort. I realized I never documented how I
+add metadata to images when annotating. I also realized I don't transfer that
+metadata to the kwcoco files. I'm going to have to update gather.py to fix
+that.
+
+To ensure there is at least one spot with documentation, I'll write it here.
+If I want to add notes to an image itself, I add a point annotation in the
+labelme file with the label "__metadata__". Then in the description I put my
+normal semicolon separated tags.
+
+I should likely transfer these to the COCO file. I should probably use the
+image caption format where the annotation only has "id", "image_id", and
+"caption" as the feilds. This agrees with the original coco spec, although it
+might make it difficult to use those raw files in coco pipelines that make
+assumptions all annotations are box / segmentation annotations.
+
+As I'm going through the annotations I'm thinking about how helpful the
+before-after part of the BAN protocol is. In some of the more difficult images,
+there are sticks and things that are really difficult to tell if they are poop
+or not, but using the knowledge that I made a best effort to pick up all poops
+before taking the after image, I can be reasonably sure that they are not poops
+and label them accordinly.
+
+Of course, there are cases where the after image does actually contain poop
+because I failed to see it when I was capturing the image, but this is rare,
+and I do often catch them when annotating. I'm sure I missed some, but as we
+train better models, I expect we can go back and polish / correct the
+annotations more. I would very much like to label all the microtrash in the
+images.
+
+I'm also noticing that when the MaskRCNN detector does a good job, it will
+often miss smaller nearby poops. In some cases this is likely due to non-max
+supression, but in other cases the smaller poop is far enough away, so it is a
+real false negative. It might be interesting to measure the detection metrics
+of each new cohort by remembering the original predictions and comparing them
+to the edited predictions.
+
+In fact, I have enough data to do this. I fixed some issues in coco evaluate
+detections to make it easier to score the predictions against the truth, and
+got this result for these detections with classes_of_interest "[poop]", so any
+non-poop truth annotation got a weight of zero.
+
+kwcoco evaluate_detections \
+    --true_dataset /home/joncrall/data/dvc-repos/shitspotter_dvc/data.kwcoco.json \
+    --pred_dataset /home/joncrall/data/dvc-repos/shitspotter_dvc/assets/poop-2025-11-25-T191532/_predictions/preds.kwcoco.json \
+    --classes_of_interest "[poop]" \
+    --compat=all \
+    --iou_thresh=0.5
+
+resulted in:
+
+'nocls_measures': <Measures({'ap': 0.384, 'auc': 0.399, 'max_f1': f1=0.51@0.89, 'nsupport': 822.000, 'realpos_total': 387.000, 'catname': None})>,
+'ovr_measures': <PerClass_Measures({
+    'poop': <Measures({'ap': 0.542, 'auc': 0.567, 'max_f1': f1=0.64@0.89, 'nsupport': 822.000, 'realpos_total': 272.000, 'catname': poop})>,
+
+This is notably lower than the measured values for vali / test sets, likely
+because this month was one of the difficult fall months with all the leaf
+distractors.
+
+It feels like the negative images are justified as well given that the MaskRCNN
+detector does often predict false positives in them. Some of them are trivially
+easy, but those are also easy to programatically identify because they have no
+annotations in them. I should look into creating a smaller variant of the
+dataset with on the most informative annotations in it to better allow more
+rapid research.
+
+I should start marking explicit BAN labels in the labelme data, but I need a
+schema. For the majority of the cases they should just be:
+
+BAN:before
+BAN:after
+BAN:negative
+
+But there are cases where the protocol is botched, so we should add labels for that.
+In the case where we have an after image where all the poop failed to be picked
+up or a negative image with incidental poop, lets use:
+
+BAN:error
+
+Let's setup the grammar to look something like this:
+
+```
+?start: expression
+IDEN: ("_"|"*"|LETTER) ("_"|" "|"-"|"*"|LETTER|DIGIT)*
+tag: IDEN
+protocol: "BAN"
+expression: protocol ":" tag ("," tag)*
+```
+
+Or maybe these labels should be applied as points outside of the __metadata__
+convention?.
+
+Ehh... this might not work given I codified labelme <-> kwcoco in kwcoco
+itself, we shouldn't special case too much. How do I get the BAN metadata in
+there?
+
+The IPFS transfer was remarkably easier this time around. No peer discovery issues.
+
+
+# 2025-12-26
+
+Well... we have some sad news. Honey was diagnosed with Lymphoma on the 15th.
+She is 12.5, but otherwise in good health. We have a few weeks left with her,
+and she is going to be deeply deeply missed. Like Beazoar, her contribution to
+this dataset will be a positive memory to reflect on.
+
+In better news the WACV WasteVision Workshop paper was accepted. To address
+reviewer concerns I'm adding a few more details to the FAQ. Many of the
+questions are answered in the text, but it will help to make some questions a
+bit more explicit.
+
+Now that the baseline paper is published that frees up so much mental energy to
+think about the next step. We can revise some of the experimental methodology
+and start asking new questions. I do need to keep up with the latest
+foundational models like DinoV3 and SAM3.
+
+I also want to revisit the IPFS experiments. Anecdotally, Kubo seems to be
+more stable recently, so reproducing that experiment would be a nice follow on.
+I think its times will improve. It doesn't seem to have a problem finding peers
+anymore.
+
+I may also want to produce alternative - even more ML ready versions of the
+dataset in the sense that it can fit into stock hugging face pipelines.
+
+A colleague made a suggestion for a tagline that is fantastic: 
+"This might not be the most important research in the world, but its at least number two."
+He gave me permission to use it and I will add to the README shortly.
+
+# 2026-01-05
+
+We lost Honey today. It was getting hard for her to breathe, but she had a good
+last day. She made some extra long poops due to the additional rich food she's
+been getting. Lots of steak, eggs, peanut butter, cheese. She gained 2 pounds
+since the diagnosis. When she was alive she constantly engaged in coprophagia,
+which makes me wonder how the number of poop pictures I take will change. I
+defiantly took pictures of half-eaten poop though, so those are in the dataset,
+and it probably will still go down. God, I'm going to miss her. She was there
+at the start of this project. There is one thing that will be reduced. Her
+little nose was so good at sniffing out old smashed poops at the dog park, the
+frequency of those will surely go down.
+
+Its interesting how many false positives and negatives there still are even in
+snow images. Some of them seem like they should be easy. E.g.
+20251211_211506870. Leafs continue to be a problem. Even in images where the
+current detector (train_baseline_maskrcnn_v3_v_966e49df_model_0014999.pth) gets
+it, there are often secondary poops it misses. Some of that is NMS, but I think
+a lot of it isn't. There are false negatives that are pretty far from the true
+positives. I really need to fine-tune a new foundational segmentation model.
+
+I did not continue the BAN labeling this time. I know there was one BAN error
+in this batch where I forgot the negative. I will likely go back and make
+explicit BAN labels for the entire dataset at some point, but not today.
+
+# 2026-02-27
+
+Gave a practice presentation at the Kitware research roundup today.  A
+co-worker pointed me to: AnimalClue to recognize animals by their traces
+https://dahlian00.github.io/AnimalCluePage/ It has 18k feces boxes from 6k
+images covering 101 species. A perfect complement this dataset. The images do
+tend to be more close up, but you probably need that for the problem they are
+solving.
+
+
+# 2026-03-13
+
+Back from WACV. I found a new related dataset: 
+
+Poultry fecal imagery dataset for health status prediction: A case of South-West Nigeria
+
+https://data.mendeley.com/datasets/8pnbzpt2k9/1
+
+https://pubmed.ncbi.nlm.nih.gov/37674505/
+19,155 100x100 images. Labeled as healthy and unhealthy. It is 65.5MB.
+
+
+We also have: Pig-Feces on Pig Skin Dataset
+https://data.mendeley.com/datasets/g97dmjymk5/3
+It is 221 MB. 
+
+# 2026-03-14
+
+Vibe coding up the next gen of detectors. The DINO v3 seems to be working,
+might have worse performance than v2, but still good. Could also just be that
+its very untuned, but I suppose v2 was as well. But for v2 I chose the gut
+check params, and in this case it was codex 5.4. Not sure if it matters.  If
+this vibe coding session works, it should also connect to a tuned SAM2 model
+and we should be able to get something better than the MaskRCNN for
+bootstrapping.
+
+# 2026-03-27
+
+Started work with a Claude agent to complement the GPT agent. Working to make
+the repo easier to use. Adding Open-GroundingDINO and YOLO-v9 as submodules.
+The existing manual experiments currently reference them as repos on my home
+disk, but going forward we should probably be using the TPL variants so we can
+add modifications to them as necessary.
+
+# 2026-04-10
+
+Finally got around to transfering the latest images from my phone, and I tried
+to use the new DINO+SAM model, but the results looked like they would take more
+effort to correct, so I reverted back to the old MaskRCNN model.
+
+It could be a pipeline issue, but I was getting detections on every single
+image (really I should only be getting those every third image), and the
+segmentations were not very tight, and there was a lot of weird overlap (e.g.
+one box around 2 poops, but then another box around one of them with the
+segmentations wrapping in weird ways).
+
+One limitation is that I've still been using the old tagged dataset for
+training, but I expect I need to revisit the pipeline. I'm also wondering if
+that's why the DINOv3 results were worse than the V2 results.
+
+I wonder what would happen if we took the results, converted them to masks,
+unioned, and then re-extracted the polygons. The pixel eval should have taken
+care of that, but the coding agents might not be able to reason well about the
+kwcoco metric code.
+
+# 2026-04-12
+
+I'm seeing something very strange in PXL_20260312_223749719.MP.jpg and
+PXL_20260312_224050094.jpg the later image appears to be temporally mixed up.
+I'm not sure how that could happen. 
+
+# 2026-05-14
+
+ITS ALIVE!
+
+We needed the bigger pico model. 416x416 and yes there were false positives and
+I needed the threshold low, but it spotted one I didn't see. 
