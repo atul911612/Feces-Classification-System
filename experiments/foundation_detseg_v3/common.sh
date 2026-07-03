@@ -1,0 +1,45 @@
+#!/bin/bash
+export SHITSPOTTER_DPATH="${SHITSPOTTER_DPATH:-$HOME/code/shitspotter}"
+export FOUNDATION_V3_DEV_DPATH="${FOUNDATION_V3_DEV_DPATH:-$SHITSPOTTER_DPATH/experiments/foundation_detseg_v3}"
+
+_foundation_v3_source="${BASH_SOURCE[0]-}"
+if [ -n "$_foundation_v3_source" ] && [ "$_foundation_v3_source" != "bash" ] && [ "$_foundation_v3_source" != "-bash" ]; then
+    FOUNDATION_V3_SCRIPT_DPATH="$(cd "$(dirname "$_foundation_v3_source")" && pwd)"
+else
+    FOUNDATION_V3_SCRIPT_DPATH="$FOUNDATION_V3_DEV_DPATH"
+fi
+FOUNDATION_V3_ROOT_DIR="$(cd "$FOUNDATION_V3_SCRIPT_DPATH/../.." && pwd)"
+FOUNDATION_V3_PACKAGE_DPATH="$FOUNDATION_V3_SCRIPT_DPATH/packages"
+unset _foundation_v3_source
+
+export FOUNDATION_V3_SCRIPT_DPATH
+export FOUNDATION_V3_ROOT_DIR
+export FOUNDATION_V3_PACKAGE_DPATH
+
+export PYTHONPATH="$FOUNDATION_V3_ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}"
+
+export SHITSPOTTER_DEIMV2_REPO_DPATH="${SHITSPOTTER_DEIMV2_REPO_DPATH:-$FOUNDATION_V3_ROOT_DIR/tpl/DEIMv2}"
+export SHITSPOTTER_SAM2_REPO_DPATH="${SHITSPOTTER_SAM2_REPO_DPATH:-$FOUNDATION_V3_ROOT_DIR/tpl/segment-anything-2}"
+export SHITSPOTTER_MASKDINO_REPO_DPATH="${SHITSPOTTER_MASKDINO_REPO_DPATH:-$FOUNDATION_V3_ROOT_DIR/tpl/MaskDINO}"
+export SHITSPOTTER_OPENGROUNDINGDINO_REPO_DPATH="${SHITSPOTTER_OPENGROUNDINGDINO_REPO_DPATH:-$FOUNDATION_V3_ROOT_DIR/tpl/Open-GroundingDino}"
+
+if command -v geowatch_dvc >/dev/null 2>&1; then
+    if [ -z "${DVC_DATA_DPATH:-}" ] && _dvc_data="$(geowatch_dvc --tags="shitspotter_data" 2>/dev/null)"; then
+        export DVC_DATA_DPATH="$_dvc_data"
+    fi
+    if [ -z "${DVC_EXPT_DPATH:-}" ] && _dvc_expt="$(geowatch_dvc --tags="shitspotter_expt" 2>/dev/null)"; then
+        export DVC_EXPT_DPATH="$_dvc_expt"
+    fi
+fi
+
+if [ -n "${DVC_DATA_DPATH:-}" ]; then
+    export FOUNDATION_V3_MODEL_DPATH="${FOUNDATION_V3_MODEL_DPATH:-$DVC_DATA_DPATH/models/foundation_detseg_v3}"
+    export FOUNDATION_V3_TRAIN_KWCOCO_FPATH="${FOUNDATION_V3_TRAIN_KWCOCO_FPATH:-$DVC_DATA_DPATH/train_imgs5747_1e73d54f.kwcoco.zip}"
+    export FOUNDATION_V3_VALI_KWCOCO_FPATH="${FOUNDATION_V3_VALI_KWCOCO_FPATH:-$DVC_DATA_DPATH/vali_imgs691_99b22ad0.kwcoco.zip}"
+    export FOUNDATION_V3_TEST_KWCOCO_FPATH="${FOUNDATION_V3_TEST_KWCOCO_FPATH:-$DVC_DATA_DPATH/test_imgs121_6cb3b6ff.kwcoco.zip}"
+else
+    export FOUNDATION_V3_MODEL_DPATH="${FOUNDATION_V3_MODEL_DPATH:-$FOUNDATION_V3_ROOT_DIR/.cache/foundation_detseg_v3}"
+    export FOUNDATION_V3_TRAIN_KWCOCO_FPATH="${FOUNDATION_V3_TRAIN_KWCOCO_FPATH:-$FOUNDATION_V3_ROOT_DIR/.cache/foundation_detseg_v3/train_imgs5747_1e73d54f.kwcoco.zip}"
+    export FOUNDATION_V3_VALI_KWCOCO_FPATH="${FOUNDATION_V3_VALI_KWCOCO_FPATH:-$FOUNDATION_V3_ROOT_DIR/.cache/foundation_detseg_v3/vali_imgs691_99b22ad0.kwcoco.zip}"
+    export FOUNDATION_V3_TEST_KWCOCO_FPATH="${FOUNDATION_V3_TEST_KWCOCO_FPATH:-$FOUNDATION_V3_ROOT_DIR/.cache/foundation_detseg_v3/test_imgs121_6cb3b6ff.kwcoco.zip}"
+fi
