@@ -1,0 +1,163 @@
+"""
+Notes:
+    The first generation of IPFS addresses
+
+    QmWhKBAQ765YH2LKMQapWp7mULkQxExrjQKeRAWNu5mfBK shitspotter_dvc/data.kwcoco.json
+    QmfYfUFRZivaJs3eyKM3x7kWGKRkwoCKU3FgeEr9ccVvy8 shitspotter_dvc/_cache
+    QmXdQzqcFv3pky621txT5Z6k41gZR9bkckG4no6DNh2ods shitspotter_dvc/assets/_poop-unstructured-2021-02-06
+    QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn shitspotter_dvc/assets/_trashed
+    QmZ4vipXwH7f27VSjx3Bz4aLoeigL9T22sFADv5KCBTFW7 shitspotter_dvc/assets/poop-2020-12-28
+    QmTHipghcRCVamWLojWKQy8KgamtRnPv9fL3dxxPv7VVZx shitspotter_dvc/assets/poop-2021-02-06
+    QmZ3W4pXVkbhQKssWBhBgspeAB3U6GRGD85eff7BvAPNri shitspotter_dvc/assets/poop-2021-03-05
+    QmZb6s53W34rmUJ2s5diw4ErhK3aLb5Td9MtML4u5wqMT5 shitspotter_dvc/assets/poop-2021-04-06
+    QmbZrgM4jCJ8ccU9DLGewPkVBDH6pDVs4vdUUk1jeKyfic shitspotter_dvc/assets/poop-2021-04-19
+    QmTexn6vX8vtAYiZYDq2YmHjoUnnJAAxEtyFPwXsqfvpKy shitspotter_dvc/assets/poop-2021-04-25
+    QmXFyYBVqVVcKqcJuGzo3d9WTRxf4U4cZBmRaT6q52mqLp shitspotter_dvc/assets/poop-2021-05-11T000000
+    QmcTkxhsA4QsWb9KJsLKGnWNyhf7SuMNhAmf55DiXqG8iU shitspotter_dvc/assets/poop-2021-05-11T150000
+    QmNVZ6BGbTWd5Tw5s4E3PagzEcvp1ekxxQL6bRSHabEsG3 shitspotter_dvc/assets/poop-2021-06-05
+    QmQAbQTbTquTyMmd27oLunS3Sw2rZvJH5p7zus4h1fvxdz shitspotter_dvc/assets/poop-2021-06-20
+    QmRkCQkAjYFoCS4cEyiDNnk9RbcoQPafmZvoP3GrpVzJ8D shitspotter_dvc/assets/poop-2021-09-20
+    QmYYUdAPYQGTg67cyRWA52yFgDAWhHDsEQX9yqED3tj4ZX shitspotter_dvc/assets/poop-2021-11-11
+    QmYXXjAutQLdq644rsugp6jxPH6GSaP3kKRTC2jsy4FQMp shitspotter_dvc/assets/poop-2021-11-26
+    QmQAufuJGGn7TDeiEE52k5SLPGrcrawjrd8S2AATrSSBvM shitspotter_dvc/assets/poop-2021-12-27
+    QmfZZwoj1gwGPctBQW5Mkye3a8VuajFBCksHVJH7r9Wn3U shitspotter_dvc/assets
+    QmRGxbcjYb7ndCzZ4fEBBk2ZR7MtU43f4SSDEeZp9vonx9 shitspotter_dvc
+
+"""
+
+
+def find_shit_coco_fpath(on_error='raise'):
+    """
+    Return the location of the shitspotter kwcoco file if it exists and is in a
+    "standard" location.
+
+    This assumes
+
+    Ignore:
+        ln -s /data/store/data/shit-pics/ $HOME/data/dvc-repos/shitspotter_dvc
+        ln -s /data/data/shit-pics/ $HOME/data/dvc-repos/shitspotter_dvc
+    """
+    dvc_dpath = find_data_dpath(on_error=on_error)
+    if dvc_dpath is None:
+        return None
+    coco_fpath = dvc_dpath / 'data.kwcoco.json'
+
+    if not coco_fpath.exists():
+        if on_error == 'raise':
+            raise Exception
+        else:
+            return None
+    return coco_fpath
+
+
+def find_data_dpath(on_error='raise'):
+    """
+    Return the location of the shitspotter data directory.
+
+    This assumes
+
+    Ignore:
+        ln -s /data/store/data/shit-pics/ $HOME/data/dvc-repos/shitspotter_dvc
+        ln -s /data/data/shit-pics/ $HOME/data/dvc-repos/shitspotter_dvc
+    """
+    import ubelt as ub
+    import os
+    _default = ub.expandpath('$HOME/data/dvc-repos/shitspotter_dvc')
+    dvc_dpath = os.environ.get('SHITSPOTTER_DVC_DPATH', _default)
+    dvc_dpath = ub.Path(dvc_dpath)
+
+    if not dvc_dpath.exists():
+        if on_error == 'raise':
+            raise Exception
+        else:
+            return None
+    return dvc_dpath
+
+
+def find_staging_dpath(on_error='raise'):
+    """
+    Return the location of the data staging directory (pre-scrubbing)
+    """
+    import ubelt as ub
+    import os
+    _default = ub.expandpath('$HOME/data/dvc-repos/shitspotter_staging/')
+    staging_dpath = os.environ.get('SHITSPOTTER_STAGING_DPATH', _default)
+    staging_dpath = ub.Path(staging_dpath)
+
+    if not staging_dpath.exists():
+        if on_error == 'raise':
+            raise Exception
+        else:
+            return None
+    return staging_dpath
+
+
+def open_shit_coco():
+    """
+    Shortcut to get "the" shitspotter dataset
+    """
+    import kwcoco
+    coco_fpath = find_shit_coco_fpath()
+    coco_dset = kwcoco.CocoDataset(coco_fpath)
+    return coco_dset
+
+
+def find_secret_dpath():
+    """
+    Resolve the directory containing privacy / secret files.
+
+    Secrets are intentionally kept *outside* the repository working tree so the
+    repo can be shared (e.g. virtiofs-mounted into a VM where other LLMs run)
+    without leaking decrypted plaintext. Resolution order:
+
+        1. ``$SHITSPOTTER_SECRET_DPATH`` if set.
+        2. The default out-of-tree location ``~/.config/shitspotter/secrets``.
+        3. Legacy in-repo ``<repo>/secrets`` (deprecated; kept only for
+           back-compat during the migration off transcrypt). Never share a tree
+           that still contains decrypted secrets at this path.
+
+    Returns:
+        ubelt.Path: the first candidate directory that exists.
+
+    Raises:
+        EnvironmentError: if none of the candidate locations exist.
+    """
+    import ubelt as ub
+    import os
+    candidates = []
+    env_dpath = os.environ.get('SHITSPOTTER_SECRET_DPATH', None)
+    if env_dpath is not None:
+        candidates.append(ub.Path(env_dpath).expand())
+    candidates.append(ub.Path('~/.config/shitspotter/secrets').expand())
+    # Legacy in-repo location (back-compat only).
+    import shitspotter
+    repo_dpath = ub.Path(shitspotter.__file__).parent.parent
+    candidates.append(repo_dpath / 'secrets')
+    for secret_dpath in candidates:
+        if secret_dpath.exists():
+            return secret_dpath
+    raise EnvironmentError(ub.paragraph(
+        f'''
+        Could not find a secrets directory (looked in
+        {[str(p) for p in candidates]}). Set $SHITSPOTTER_SECRET_DPATH or
+        populate ~/.config/shitspotter/secrets. Secrets are intentionally kept
+        outside the repo tree so it can be virtiofs-shared without leaking
+        plaintext.
+        '''))
+
+
+def find_dvc_dpath():
+    """
+    """
+    import ubelt as ub
+    import os
+    _default = ub.expandpath('$HOME/data/dvc-repos/shitspotter_dvc')
+    dvc_dpath = os.environ.get('SHITSPOTTER_DVC_DPATH', _default)
+    dvc_dpath = ub.Path(dvc_dpath)
+    return dvc_dpath
+
+
+def is_probably_encrypted(fpath):
+    with open(fpath, 'r') as file:
+        firstbytes = file.read(8)
+        return firstbytes == 'U2FsdGVk'
