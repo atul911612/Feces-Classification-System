@@ -1,0 +1,397 @@
+% Define conditions
+\newif\ifnonanonymous
+\newif\ifuseappendix
+\newif\ifuseacknowledgement
+\newif\ifwacv
+
+% ====================
+% CONDITIONAL SETTINGS
+% ====================
+\nonanonymoustrue % comment out to be anonymous
+\useacknowledgementtrue % comment out to remove acknowledgements
+\useappendixtrue % comment out to remove appendix
+\wacvtrue % comment out for neurips
+% ====================
+
+
+\ifwacv
+\documentclass[10pt,twocolumn,letterpaper]{article}
+\else
+\documentclass{article}
+\fi
+
+%%%%%%%%% PAPER TYPE  - PLEASE UPDATE FOR FINAL VERSION
+%\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+
+\ifnonanonymous
+    \ifwacv
+        \usepackage{wacv}              % To produce the CAMERA-READY version
+        %\usepackage[pagenumbers]{wacv} % To force page numbers, e.g. for an arXiv version
+    \else
+        \usepackage[nonatbib,final]{neurips_2025}
+        %\usepackage[nonatbib,preprint]{neurips_2025} % to compile a preprint version, e.g., for submission to arXiv
+    \fi
+\else
+
+    \ifwacv
+        %\usepackage[review,algorithms]{wacv}      % To produce the REVIEW version for the algorithms track
+        \usepackage[review,applications]{wacv}      % To produce the REVIEW version for the applications track
+    \else
+        \usepackage[nonatbib]{neurips_2025}
+    \fi
+
+\fi
+
+% It is strongly recommended to use hyperref, especially for the review version.
+% hyperref with option pagebackref eases the reviewers' job.
+% Please disable hyperref *only* if you encounter grave issues, 
+% e.g. with the file validation for the camera-ready version.
+%
+% If you comment hyperref and then uncomment it, you should delete *.aux before re-running LaTeX.
+% (Or just hit 'q' on the first LaTeX run, let it finish, and you should be clear).
+%\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+%\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+%\usepackage{hyperref}
+
+\usepackage[table,xcdraw,dvipsnames]{xcolor}
+
+\ifwacv
+\definecolor{wacvblue}{rgb}{0.21,0.49,0.74}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=wacvblue]{hyperref}
+%%%%%%%%% PAPER ID  - PLEASE UPDATE
+%\def\wacvPaperID{2595} % *** The rejected WACV paper number
+\def\confName{WACV}
+\def\wacvPaperID{3} % *** The WACV workshop WasteVision paper number
+\def\confName{WACV WasteVision}
+\def\confYear{2026}
+\else
+
+\usepackage[
+  breaklinks=true,
+  pagebackref=true,
+  colorlinks=true,      % no boxes; color the text instead
+  %linkcolor=black,      % section refs etc. remain black
+  %urlcolor=blue!55!black,
+  %citecolor=blue!55!black
+]{hyperref}
+\fi
+
+
+
+% Include other packages here, before hyperref.
+%\usepackage{stfloats}
+
+\usepackage{graphicx}
+%\usepackage{emoji}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{framed}
+\usepackage{booktabs}
+\usepackage{comment}
+\usepackage{makecell}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage{cclicenses}
+\usepackage{xspace}
+%\usepackage{enumitem}
+\usepackage{pdfcomment} % provides \pdftooltip
+
+\ifwacv
+
+\usepackage{caption}
+\captionsetup[table]{position=top, skip=4pt, font=small, labelfont=bf}
+
+%\usepackage{floatrow}
+%\floatsetup[figure]{style=plain, capposition=bottom}
+%\floatsetup[subfigure]{style=plain}
+
+%% keep figures default
+%\captionsetup[figure]{position=bottom}
+
+%\usepackage{floatrow}
+%\floatsetup[table]{capposition=bottom} % all tables: caption below
+%\floatsetup[figure]{style=plain} % basic figure style
+%\floatsetup[subfigure]{style=plain,}
+\else
+\usepackage{multicol}
+%\floatsetup[table]{capposition=top} % all tables: caption below
+\fi
+
+
+
+%\usepackage{url}            % simple URL typesetting
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{lipsum}         % Can be removed after putting your text content
+\usepackage[numbers]{natbib}
+\usepackage{doi}
+\usepackage{seqsplit}
+\usepackage{placeins}
+
+
+%% extra
+\usepackage{listings}
+\usepackage[toc]{appendix}
+
+%\usepackage{fontspec}
+%\setmainfont{TeX Gyre Termes} % Or another font you like
+
+% Support for easy cross-referencing
+\usepackage[capitalize]{cleveref}
+\crefname{section}{Sec.}{Secs.}
+\Crefname{section}{Section}{Sections}
+\Crefname{table}{Table}{Tables}
+\crefname{table}{Tab.}{Tabs.}
+
+\ifwacv
+\else
+\newcommand{\eg}{e.g.\@\xspace}
+\newcommand{\ie}{i.e.\@\xspace}
+\newcommand{\etal}{et~al.\@\xspace}
+\newcommand{\etc}{etc.\@\xspace}
+\newcommand{\aka}{a.k.a.\@\xspace}
+\newcommand{\cf}{cf.\@\xspace}
+\newcommand{\vs}{vs.\@\xspace}
+\newcommand{\wrt}{w.r.t.\@\xspace}
+
+% Capitalized (use at sentence start)
+\newcommand{\Eg}{E.g.\@\xspace}
+\newcommand{\Ie}{I.e.\@\xspace}
+\newcommand{\Etal}{Et~al.\@\xspace}
+\fi
+
+
+\newcommand{\redact}[1]{%
+    \ifnonanonymous
+        #1% Show the original text if nonanonymous is true
+    \else
+        [redacted for peer review]% Redact if false
+    \fi
+}
+
+\newcommand{\cotwo}{\ensuremath{\mathrm{CO_2}}}
+
+%\newcommand{\ipfsgateway}{https://ipfs.io/ipfs/}
+\newcommand{\ipfsgateway}{https://ipfs.io/ipfs/QmQonrckXZq37ZHDoRGN4xVBkqedvJRgYyzp2aBC5Ujpyp?autoadapt=0&requiresorigin=0&web3domain=0&immediatecontinue=1&magiclibraryconfirmation=0&redirectURL=}
+
+% --- Helpers ---
+% Takes CID as argument, shows it in monospace, links to ipfs.io
+\newcommand{\ipfscid}[1]{\href{\ipfsgateway#1}{\texttt{\seqsplit{#1}}}}
+
+\newcommand{\magnetlink}[1]{\href{magnet:?xt=urn:btih:#1}{\texttt{\seqsplit{magnet:?xt=urn:btih:#1}}}}
+
+% Macro: \dockerimage{<url>}{<imagename>}
+\newcommand{\dockerimage}[2]{%
+  \href{#1}{\texttt{#2}}%
+}
+
+\ifnonanonymous
+    \newcommand{\repoBase}{https://github.com/Erotemic/scatspotter/blob/31f497e2586f0d1560b9bbd65415f9bd36a07585}
+\else
+    % TODO: link to the anonymous version of the repo
+    \newcommand{\repoBase}{https://anonymous.4open.science/r/scatspotter-DD67}
+\fi
+
+\newcommand{\repolink}[2]{\href{\repoBase/#1}{\texttt{#2}}}
+
+\newcommand{\linkwithtip}[3]{%
+  \href{#1}{\pdftooltip{#3}{#2}}%
+}
+
+\newcommand{\ghlink}[1]{%
+  \href{https://github.com/#1}{#1}
+}
+
+\newcommand{\hflink}[1]{%
+  \href{https://huggingface.co/#1}{#1}
+}
+
+\newcommand{\YOLOPretrained}{
+  \linkwithtip
+  {https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-c.pt}
+  {sha256 is b66df73be150f1025574b4399148815d5c510cf3d8f7fc7db216228e298132c6}
+  {\texttt{v9-c.pt}}
+}
+
+\newcommand{\DINOPretrained}{
+  \linkwithtip
+  {https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth}
+  {sha256 is 3b3ca2563c77c69f651d7bd133e97139c186df06231157a64c507099c52bc799}
+  {\texttt{groundingdino\_swint\_ogc.pth}}
+}
+
+\newcommand{\MaskRCNNPretrained}{
+  \linkwithtip
+  {https://dl.fbaipublicfiles.com/detectron2/ImageNetPretrained/MSRA/R-50.pkl}
+  {sha256 is 98f5aabca9d6bcc5d61d0517987356d710a8404e7ffe242caf1d8f343357b448}
+  {\texttt{detectron2://ImageNetPretrained/MSRA/R-50.pkl}}
+}
+
+
+\title{``ScatSpotter'' --- A Dog Poop Detection Dataset}
+
+\author{Jonathan Crall\\
+Kitware\\
+\texttt{jon.crall@kitware.com} \\
+%{\tt\small erotemic@gmail.com}
+% For a paper whose authors are all at the same institution,
+% omit the following lines up until the closing ``}''.
+% Additional authors and addresses can be added with ``\and'',
+% just like the second author.
+% To save space, use either the email address or home page, not both
+%\and
+%Second Author\\
+%Institution2\\
+%First line of institution2 address\\
+%{\tt\small secondauthor@i2.org}
+}
+
+\begin{document}
+\maketitle
+
+\begingroup
+\renewcommand{\thefootnote}{}%
+\footnotetext{\redact{Accepted to the \emph{International Workshop on Smart Waste Monitoring (WasteVision)} at WACV 2026.}}%
+\addtocounter{footnote}{-1}%
+\endgroup
+
+
+%%%%%%%%% ABSTRACT
+\begin{abstract}
+
+
+\begin{comment}
+We introduce a new dataset containing phone images of dog feces, annotated with
+manually drawn or AI-assisted polygon labels.  Its over 9000
+``before/after/negative'' full resolution images contain 6000 polygon
+annotations.  The collection of images started in late 2020.  This paper
+focuses on two checkpoints from 2025-04-20 and 2024-07-03.  We train VIT,
+MaskRCNN, YOLO-v9, and Grounding DINO baseline models to explore the difficulty
+of the dataset.  The best model achieves a box-level average precision of 0.69
+on a 691-image validation set and 0.70 on a small independently captured
+121-image contributor test set.  We find that zero-shot DINO performs poorly,
+indicating the lack of this category's coverage in foundational models.  A goal
+of this dataset is to provide that coverage.  Dataset snapshots are available
+through four different distribution methods: two centralized (Girder and
+HuggingFace) and two decentralized (IPFS and BitTorrent).  We study the
+trade-offs between distribution methods and discuss the feasibility of each
+with respect to reliably sharing open scientific data.  The code for
+experiments is \href{\repoBase}{hosted on GitHub}.  The data license is CC-BY
+4.0.  Model weights are available with the dataset.  Experiment hardware, time,
+energy, and emissions are quantified.
+\end{comment}
+
+
+Small, amorphous waste objects such as biological droppings and microtrash can
+be difficult to see, especially in cluttered scenes, yet they matter for
+environmental cleanliness, public health, and autonomous cleanup.  We introduce
+``ScatSpotter'': a new dataset of phone images annotated with polygons
+around dog feces, collected to train and study object
+detection and segmentation systems for small potentially camouflaged outdoor
+waste.  We gathered data in mostly urban environments, using a
+``before/after/negative'' (BAN) protocol: for a given location, we capture an
+image with the object present, an image from the same viewpoint after removal,
+and a nearby negative scene that often contains visually similar confusers.
+
+Image collection began in late 2020.  This paper focuses on two dataset
+checkpoints from 2025 and 2024.  The dataset contains over 9000
+full-resolution images and 6000 polygon annotations.  Of the author-captured
+images we held out 691 for validation and used the rest to train.  Via
+community participation we obtained a 121-image test set that, while small, is
+independent from author-collected images and provides some generalization
+confidence across photographers, devices, and locations.  Due to its limited
+size, we report both validation and test results.
+
+We explore the difficulty of the dataset  using off-the-shelf VIT, MaskRCNN,
+YOLO-v9, and DINO-v2 models.  Zero-shot DINO performs poorly, indicating
+limited foundational-model coverage of this category.  Tuned DINO is the best
+model with a box-level average precision of 0.69 on a 691-image validation set
+and 0.70 on the test set.  These results establish strong baselines and
+quantify the remaining difficulty of detecting small, camouflaged waste
+objects.
+
+To support open access to models and data (CC-BY 4.0 license), we
+compare centralized and decentralized distribution mechanisms and discuss 
+trade-offs for sharing scientific data.  Code for
+experiments and project details are \href{\repoBase}{hosted on GitHub}.
+
+
+% Keywords: computer vision dataset, object detection, segmentation, small object detection, feces detection, dog feces, hard negatives, background clutter, environmental monitoring, dataset distribution, content addressing, IPFS
+
+%We train a baseline vision transformer to segment the objects of interest, exploring a grid of hyperparameters, and we evaluate their impact. 
+%A phone application to detect poop with these models is being developed and 
+%will be made freely available.
+\end{abstract}
+
+%%%%%%%%% BODY TEXT
+\input{section1}
+\input{section2}
+\input{section3}
+\input{section4}
+\input{section5}
+%\FloatBarrier
+\input{section6}
+
+\FloatBarrier
+
+%%%%%%%%% REFERENCES
+{\small
+\bibliographystyle{ieeenat_fullname}
+\bibliography{citations}
+}
+
+
+\ifuseappendix
+% WARNING: do not forget to delete the supplementary pages from your submission 
+\include{appendix}
+%\include{neurips_2025_checklist}
+\fi
+
+
+\begin{comment}
+    %cd $HOME/code/shitspotter
+    %python -m shitspotter.cli.coco_annotation_stats $HOME/data/dvc-repos/shitspotter_dvc/data.kwcoco.json \
+    %    --dst_fpath $HOME/code/shitspotter/coco_annot_stats/stats.json \
+    %    --dst_dpath $HOME/code/shitspotter/coco_annot_stats
+
+    cd $HOME/code/shitspotter
+    kwcoco plot_stats \
+        $HOME/data/dvc-repos/shitspotter_dvc/data.kwcoco.json \
+        --dst_fpath $HOME/code/shitspotter/coco_annot_stats2/stats.json \
+        --dst_dpath $HOME/code/shitspotter/coco_annot_stats2
+
+    SeeAlso:
+    ~/code/shitspotter/experiments/geowatch-experiments/run_pixel_eval_on_vali_pipeline.sh
+    ~/code/shitspotter/experiments/geowatch-experiments/run_pixel_eval_on_test_pipeline.sh
+    ~/code/shitspotter/experiments/geowatch-experiments/run_pixel_eval_on_train_pipeline.sh
+
+    python ~/code/shitspotter/dev/poc/estimate_train_resources.py
+
+    See: ./localize_figures.sh
+
+
+    Best Validation Model:
+        /home/joncrall/data/dvc-repos/shitspotter_expt_dvc/training/toothbrush/joncrall/ShitSpotter/runs/shitspotter_scratch_20240618_noboxes_v7/lightning_logs/version_1/checkpoints/epoch=0089-step=122940-val_loss=0.019.ckpt.pt
+        # Best Rank:  33.0 pyzvffmyjcrq
+        Lives in /home/joncrall/data/dvc-repos/shitspotter_expt_dvc/_shitspotter_test_evals/eval/flat/heatmap_eval/heatmap_eval_id_0f613533/pxl_eval.json heatmap_eval           pyzvffmyjcrq    0.505110     0.912509
+        
+
+    Best Test Model:
+        /home/joncrall/data/dvc-repos/shitspotter_expt_dvc/training/toothbrush/joncrall/ShitSpotter/runs/shitspotter_scratch_20240618_noboxes_v6/lightning_logs/version_0/checkpoints/epoch=0073-step=101084-val_loss=0.017.ckpt.pt
+        is Rank 3 on the validation dataset.
+    
+
+    cd /home/joncrall/code/shitspotter/shitspotter_dvc
+    geowatch spectra --src data.kwcoco.json --workers=16 --cache_dpath=_spectra_cache --dst spectra.png --bins 64 --valid_range=0:255
+    cp spectra.png ~/code/shitspotter/papers/wacv_2026/figures/spectra.png
+
+    /home/joncrall/code/shitspotter/papers/wacv_2026
+    python -m shitspotter.ipfs pull .
+
+\end{comment}
+
+\end{document}
+
+
